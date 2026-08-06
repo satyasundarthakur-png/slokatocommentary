@@ -1,6 +1,8 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/noto-sans-oriya";
+@import "@fontsource/noto-serif-devanagari";
 
 @custom-variant dark (&:is(.dark *));
 
