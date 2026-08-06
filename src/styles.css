@@ -1,6 +1,8 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/noto-sans-oriya";
+@import "@fontsource/noto-serif-devanagari";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -141,4 +143,56 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+/* ── AshtavakraTika: manuscript design system ─────────────────────── */
+@theme inline {
+  --font-odia: "Noto Sans Oriya", serif;
+  --font-deva: "Noto Serif Devanagari", serif;
+  --color-parchment: var(--parchment);
+  --color-ink: var(--ink);
+  --color-rubric: var(--rubric);
+}
+
+:root {
+  --radius: 0.25rem;
+  --parchment: oklch(0.968 0.014 85);
+  --ink: oklch(0.26 0.02 60);
+  --rubric: oklch(0.48 0.14 40);
+  --background: oklch(0.968 0.014 85);
+  --foreground: oklch(0.26 0.02 60);
+  --card: oklch(0.988 0.008 90);
+  --card-foreground: oklch(0.26 0.02 60);
+  --popover: oklch(0.988 0.008 90);
+  --popover-foreground: oklch(0.26 0.02 60);
+  --primary: oklch(0.42 0.11 42);
+  --primary-foreground: oklch(0.98 0.01 90);
+  --secondary: oklch(0.93 0.018 82);
+  --secondary-foreground: oklch(0.3 0.03 60);
+  --muted: oklch(0.94 0.014 84);
+  --muted-foreground: oklch(0.5 0.02 65);
+  --accent: oklch(0.91 0.03 78);
+  --accent-foreground: oklch(0.3 0.04 55);
+  --border: oklch(0.86 0.02 78);
+  --input: oklch(0.86 0.02 78);
+  --ring: oklch(0.55 0.09 45);
+  --sidebar: oklch(0.945 0.018 82);
+  --sidebar-foreground: oklch(0.26 0.02 60);
+  --sidebar-border: oklch(0.86 0.02 78);
+}
+
+@layer base {
+  body {
+    font-family: var(--font-odia);
+    background-image:
+      radial-gradient(oklch(0.82 0.03 78 / 0.25) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+}
+
+@utility tika-prose {
+  text-align: justify;
+  text-justify: inter-word;
+  line-height: 2.15;
+  font-size: 1.075rem;
 }
