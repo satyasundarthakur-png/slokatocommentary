@@ -1,5 +1,6 @@
 import type { TikaUnit } from "@/lib/book";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function BookSidebar({
   units,
@@ -16,9 +17,10 @@ export function BookSidebar({
 }) {
   return (
     <div className="space-y-1">
-      <p className="mb-2 text-[0.8rem] tracking-wide text-muted-foreground">
-        ଗ୍ରନ୍ଥର ଏକକ ({units.length})
-      </p>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="font-display text-lg text-rubric">ଗ୍ରନ୍ଥର ଏକକ</p>
+        <span className="bg-teal px-2 py-0.5 font-interface text-[0.65rem] font-bold text-secondary-foreground">{units.length}</span>
+      </div>
       {units.length === 0 && (
         <p className="text-sm text-muted-foreground/80">ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ଏକକ ନାହିଁ।</p>
       )}
@@ -26,42 +28,43 @@ export function BookSidebar({
         {units.map((u, i) => (
           <li
             key={u.id}
-            className={`group flex items-center gap-1 rounded-sm border px-2 py-1.5 transition-colors ${
+            className={`group flex items-center gap-1 border-l-4 px-2 py-2 transition-colors ${
               u.id === activeId
-                ? "border-ring/60 bg-accent"
+                ? "border-rubric bg-marigold/25"
                 : "border-transparent hover:bg-accent/50"
             }`}
           >
-            <button
+            <Button
+              variant="ghost"
               onClick={() => onSelect(u.id)}
-              className="flex-1 truncate text-left text-sm text-foreground"
+              className="h-auto min-w-0 flex-1 justify-start truncate rounded-none px-1 py-1 text-left text-sm font-normal text-foreground hover:bg-transparent"
               title={u.reference}
             >
               <span className="mr-1.5 text-muted-foreground">{i + 1}.</span>
               {u.reference}
-            </button>
+            </Button>
             <span className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-              <button
+              <Button variant="ghost" size="icon"
                 aria-label="ଉପରକୁ"
                 onClick={() => onMove(i, -1)}
-                className="rounded-sm p-1 text-muted-foreground hover:text-foreground"
+                className="size-7 rounded-sm text-muted-foreground hover:text-foreground"
               >
                 <ArrowUp className="h-3.5 w-3.5" />
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost" size="icon"
                 aria-label="ତଳକୁ"
                 onClick={() => onMove(i, 1)}
-                className="rounded-sm p-1 text-muted-foreground hover:text-foreground"
+                className="size-7 rounded-sm text-muted-foreground hover:text-foreground"
               >
                 <ArrowDown className="h-3.5 w-3.5" />
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost" size="icon"
                 aria-label="ବିଲୋପ"
                 onClick={() => onDelete(u.id)}
-                className="rounded-sm p-1 text-muted-foreground hover:text-destructive"
+                className="size-7 rounded-sm text-muted-foreground hover:text-destructive"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </span>
           </li>
         ))}

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { TikaLength } from "@/lib/book";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
 export interface FormValues {
   verse: string;
@@ -24,9 +26,9 @@ export function hasSanskritText(v: string) {
 }
 
 const fieldCls =
-  "w-full rounded-sm border border-border bg-card px-3 py-2 text-[0.95rem] text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-ring focus:ring-1 focus:ring-ring";
+  "w-full rounded-sm border border-sidebar-border bg-card/80 px-3 py-2.5 text-[0.95rem] text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-teal focus:ring-2 focus:ring-teal/20";
 
-const labelCls = "mb-1.5 block text-[0.8rem] tracking-wide text-muted-foreground";
+const labelCls = "mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-rubric";
 
 export function VerseForm({
   busy,
@@ -60,7 +62,7 @@ export function VerseForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4">
+    <form onSubmit={submit} className="space-y-4 font-odia">
       <div>
         <label className={labelCls} htmlFor="verse">
           ମୂଳ ଶ୍ଲୋକ (ସଂସ୍କୃତ) *
@@ -132,18 +134,19 @@ export function VerseForm({
       </div>
 
       {error && (
-        <p className="rounded-sm border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm leading-relaxed text-destructive">
+        <p className="rounded-sm border-l-4 border-destructive bg-card px-3 py-2 text-sm leading-relaxed text-destructive shadow-sm">
           {error}
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={busy}
-        className="w-full rounded-sm bg-primary px-4 py-2.5 text-[0.95rem] tracking-wide text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="h-11 w-full rounded-sm border-b-4 border-marigold bg-primary font-interface text-[0.9rem] font-semibold text-primary-foreground shadow-md hover:bg-teal"
       >
+        <Sparkles aria-hidden="true" />
         {busy ? "ଟୀକା ପ୍ରସ୍ତୁତ ହେଉଛି…" : "ଟୀକା ରଚନା କରନ୍ତୁ"}
-      </button>
+      </Button>
     </form>
   );
 }

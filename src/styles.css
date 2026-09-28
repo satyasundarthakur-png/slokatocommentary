@@ -3,6 +3,8 @@
 @import "tw-animate-css";
 @import "@fontsource/noto-sans-oriya";
 @import "@fontsource/noto-serif-devanagari";
+@import "@fontsource/instrument-serif";
+@import "@fontsource/work-sans";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -149,45 +151,74 @@
 @theme inline {
   --font-odia: "Noto Sans Oriya", serif;
   --font-deva: "Noto Serif Devanagari", serif;
+  --font-display: "Instrument Serif", "Noto Sans Oriya", serif;
+  --font-interface: "Work Sans", "Noto Sans Oriya", sans-serif;
   --color-parchment: var(--parchment);
   --color-ink: var(--ink);
   --color-rubric: var(--rubric);
+  --color-marigold: var(--marigold);
+  --color-teal: var(--teal);
+  --color-festival: var(--festival);
 }
 
 :root {
   --radius: 0.25rem;
-  --parchment: oklch(0.968 0.014 85);
-  --ink: oklch(0.26 0.02 60);
-  --rubric: oklch(0.48 0.14 40);
-  --background: oklch(0.968 0.014 85);
+  --parchment: oklch(0.953 0.034 86);
+  --ink: oklch(0.25 0.025 49);
+  --rubric: oklch(0.426 0.143 36);
+  --marigold: oklch(0.758 0.148 79);
+  --teal: oklch(0.499 0.083 184);
+  --festival: oklch(0.986 0.014 87);
+  --background: oklch(0.914 0.042 79);
   --foreground: oklch(0.26 0.02 60);
-  --card: oklch(0.988 0.008 90);
+  --card: var(--festival);
   --card-foreground: oklch(0.26 0.02 60);
-  --popover: oklch(0.988 0.008 90);
+  --popover: var(--festival);
   --popover-foreground: oklch(0.26 0.02 60);
-  --primary: oklch(0.42 0.11 42);
-  --primary-foreground: oklch(0.98 0.01 90);
-  --secondary: oklch(0.93 0.018 82);
-  --secondary-foreground: oklch(0.3 0.03 60);
-  --muted: oklch(0.94 0.014 84);
-  --muted-foreground: oklch(0.5 0.02 65);
-  --accent: oklch(0.91 0.03 78);
-  --accent-foreground: oklch(0.3 0.04 55);
-  --border: oklch(0.86 0.02 78);
-  --input: oklch(0.86 0.02 78);
-  --ring: oklch(0.55 0.09 45);
-  --sidebar: oklch(0.945 0.018 82);
+  --primary: var(--rubric);
+  --primary-foreground: var(--festival);
+  --secondary: var(--teal);
+  --secondary-foreground: var(--festival);
+  --muted: oklch(0.916 0.04 84);
+  --muted-foreground: oklch(0.48 0.045 58);
+  --accent: oklch(0.858 0.105 79);
+  --accent-foreground: oklch(0.29 0.06 45);
+  --destructive: oklch(0.54 0.2 27);
+  --destructive-foreground: var(--festival);
+  --border: oklch(0.78 0.07 74);
+  --input: oklch(0.78 0.07 74);
+  --ring: var(--marigold);
+  --sidebar: oklch(0.928 0.045 84);
   --sidebar-foreground: oklch(0.26 0.02 60);
-  --sidebar-border: oklch(0.86 0.02 78);
+  --sidebar-primary: var(--rubric);
+  --sidebar-primary-foreground: var(--festival);
+  --sidebar-accent: oklch(0.861 0.089 79);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: oklch(0.75 0.08 68);
+  --sidebar-ring: var(--marigold);
 }
 
 @layer base {
   body {
     font-family: var(--font-odia);
     background-image:
-      radial-gradient(oklch(0.82 0.03 78 / 0.25) 1px, transparent 1px);
-    background-size: 22px 22px;
+      linear-gradient(90deg, oklch(0.426 0.143 36 / 0.035) 1px, transparent 1px),
+      linear-gradient(oklch(0.426 0.143 36 / 0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
   }
+}
+
+@keyframes manuscript-settle {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility manuscript-settle {
+  animation: manuscript-settle 420ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .manuscript-settle { animation: none; }
 }
 
 @utility tika-prose {
