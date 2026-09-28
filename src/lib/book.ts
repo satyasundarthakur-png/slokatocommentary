@@ -46,12 +46,11 @@ export function move<T>(arr: T[], from: number, to: number): T[] {
 /** Split commentary into paragraph blocks, treating "●" lines as unit separators. */
 export function parseCommentary(text: string): Array<{ type: "para" | "sep"; text: string }> {
   return text
-    .split(/\n{2,}|\n/)
+    .split(/\s*[●•]+\s*|\n{2,}|\n/)
     .map((l) => l.trim())
     .filter(Boolean)
-    .map((line) =>
-      /^[●•]+$/.test(line)
-        ? ({ type: "sep", text: "●" } as const)
-        : ({ type: "para", text: line } as const),
-    );
+    .flatMap((line, index, all) => [
+      { type: "para" as const, text: line },
+      ...(index < all.length - 1 ? [{ type: "sep" as const, text: "●" }] : []),
+    ]);
 }
