@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Download, Flower2 } from "lucide-react";
 import { Aurora } from "@/components/Aurora";
@@ -11,6 +11,8 @@ import { loadBook, move, saveBook, type TikaUnit } from "@/lib/book";
 import { exportBookDocx } from "@/lib/docxExport";
 import { generateTika } from "@/lib/tika.functions";
 import { Button } from "@/components/ui/button";
+import { BulkPanel } from "@/components/BulkPanel";
+import { MODELS, DEFAULT_MODEL_ID, loadModelId, saveModelId } from "@/lib/models";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,9 +40,15 @@ function Index() {
   const [units, setUnits] = useState<TikaUnit[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState<"single" | "bulk">("single");
+  const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
+  const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
+  const cancelRef = useRef(false);
+  const unitsRef = useRef<TikaUnit[]>([]);
   const generate = useServerFn(generateTika);
 
   useEffect(() => {
+    setModelId(loadModelId());
     const stored = loadBook();
     setUnits(stored);
     setActiveId(stored[stored.length - 1]?.id ?? null);
@@ -52,6 +60,7 @@ function Index() {
   );
 
   function persist(next: TikaUnit[]) {
+    unitsRef.current = next;
     setUnits(next);
     saveBook(next);
   }
@@ -59,7 +68,7 @@ function Index() {
   async function handleSubmit(values: FormValues) {
     setBusy(true);
     try {
-      const { commentary } = await generate({ data: values });
+      const { commentary } = await generate({ data: { ...values, modelId } });
       const unit: TikaUnit = {
         id: crypto.randomUUID(),
         ...values,
@@ -86,6 +95,7 @@ function Index() {
           supportingTexts: active.supportingTexts,
           topic: active.topic,
           length: active.length,
+          modelId,
         },
       });
       persist(
@@ -99,6 +109,49 @@ function Index() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function generateWithRetry(v: FormValues): Promise<{ text: string | null; err: string }> {
+    let err = "";
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const { commentary } = await generate({ data: { ...v, modelId } });
+        return { text: commentary, err: "" };
+      } catch (e) {
+        err = e instanceof Error ? e.message : "ତ୍ରୁଟି ହେଲା।";
+        if (attempt < 3) await new Promise((r) => setTimeout(r, 4000 * attempt));
+      }
+    }
+    return { text: null, err };
+  }
+
+  async function handleBulk(items: FormValues[]) {
+    setBusy(true);
+    cancelRef.current = false;
+    let acc = unitsRef.current;
+    let done = 0;
+    let failed = 0;
+    setProgress({ done, total: items.length, failed });
+    for (let i = 0; i < items.length && !cancelRef.current; i += 3) {
+      const chunk = items.slice(i, i + 3);
+      const results = await Promise.all(chunk.map(generateWithRetry));
+      const fresh: TikaUnit[] = results.flatMap((r, k) =>
+        r.text ? [{ id: crypto.randomUUID(), ...chunk[k]!, commentary: r.text, createdAt: Date.now() }] : [],
+      );
+      done += chunk.length;
+      failed += chunk.length - fresh.length;
+      acc = [...acc, ...fresh];
+      persist(acc);
+      if (fresh.length) setActiveId(fresh[fresh.length - 1]!.id);
+      setProgress({ done, total: items.length, failed });
+      if (fresh.length === 0) {
+        toast.error(results[0]?.err ?? "ତ୍ରୁଟି ହେଲା।");
+        break;
+      }
+    }
+    toast.success(`${done - failed} ଟୀକା ଗ୍ରନ୍ଥରେ ଯୋଡ଼ାଗଲା${failed ? ` (${failed} ବିଫଳ)` : ""}।`);
+    setProgress(null);
+    setBusy(false);
   }
 
   async function handleExport() {
@@ -143,7 +196,38 @@ function Index() {
             <span className="pulse-glow size-3 rounded-full bg-gradient-to-br from-amber-400 to-fuchsia-500" />
             <h2 className="font-display text-2xl text-fuchsia-800">ନୂତନ ଟୀକା ଏକକ</h2>
           </div>
-          <VerseForm busy={busy} onSubmit={handleSubmit} />
+          <div>
+            <label htmlFor="model" className="mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800">AI ମଡେଲ୍</label>
+            <select
+              id="model"
+              value={modelId}
+              disabled={busy}
+              onChange={(e) => { setModelId(e.target.value); saveModelId(e.target.value); }}
+              className="glow-field w-full rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 font-interface text-[0.9rem] outline-none"
+            >
+              {MODELS.map((m) => (
+                <option key={m.id} value={m.id}>{m.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-1 rounded-2xl bg-white/60 p-1 font-interface text-sm font-semibold">
+            {([["single", "ଏକ ଶ୍ଲୋକ"], ["bulk", "ବହୁ ଶ୍ଲୋକ · DOCX"]] as const).map(([k, label]) => (
+              <button
+                key={k}
+                type="button"
+                disabled={busy}
+                onClick={() => setMode(k)}
+                className={`rounded-xl px-2 py-2 transition ${mode === k ? "glow-btn text-white" : "text-fuchsia-900 hover:bg-white/80"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {mode === "single" ? (
+            <VerseForm busy={busy} onSubmit={handleSubmit} />
+          ) : (
+            <BulkPanel busy={busy} progress={progress} onStart={handleBulk} onCancel={() => { cancelRef.current = true; }} />
+          )}
           <div className="border-t-2 border-dashed border-cyan-400/60 pt-6">
             <BookSidebar
               units={units}
