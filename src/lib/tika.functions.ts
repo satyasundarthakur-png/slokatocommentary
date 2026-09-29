@@ -14,6 +14,7 @@ const TikaInput = z.object({
   topic: z.string().trim().max(300).optional().default(""),
   modelId: z.enum(MODEL_IDS).optional().default(DEFAULT_MODEL_ID),
   language: z.enum(LANGUAGE_IDS).optional().default(DEFAULT_LANGUAGE_ID),
+  apiKey: z.string().trim().max(300).optional().default(""),
 });
 
 export type TikaInput = z.infer<typeof TikaInput>;
@@ -54,9 +55,9 @@ const fail = (status: number, provider: string, detail: string): never => {
   throw new Error("ଟୀକା ପ୍ରସ୍ତୁତ କରିବାରେ ତ୍ରୁଟି ହେଲା।");
 };
 
-async function callGroq(model: string, system: string, userMessage: string) {
-  const apiKey = process.env["GROQ_API_KEY"];
-  if (!apiKey) throw new Error("GROQ_API_KEY ସେଟ୍ ହୋଇନାହିଁ। ଦୟାକରି API କି ଯୋଡ଼ନ୍ତୁ।");
+async function callGroq(model: string, system: string, userMessage: string, userKey: string) {
+  const apiKey = userKey || process.env["GROQ_API_KEY"];
+  if (!apiKey) throw new Error("Groq API କି ନାହିଁ — ମଡେଲ୍ ତଳେ ଆପଣଙ୍କ Groq API key ଯୋଡ଼ନ୍ତୁ।");
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
@@ -74,9 +75,9 @@ async function callGroq(model: string, system: string, userMessage: string) {
   return json.choices?.[0]?.message?.content ?? "";
 }
 
-async function callGemini(model: string, system: string, userMessage: string) {
-  const apiKey = process.env["GEMINI_API_KEY"];
-  if (!apiKey) throw new Error("GEMINI_API_KEY ସେଟ୍ ହୋଇନାହିଁ। ଦୟାକରି API କି ଯୋଡ଼ନ୍ତୁ।");
+async function callGemini(model: string, system: string, userMessage: string, userKey: string) {
+  const apiKey = userKey || process.env["GEMINI_API_KEY"];
+  if (!apiKey) throw new Error("Gemini API କି ନାହିଁ — ମଡେଲ୍ ତଳେ ଆପଣଙ୍କ Gemini API key ଯୋଡ଼ନ୍ତୁ।");
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
@@ -108,8 +109,8 @@ export const generateTika = createServerFn({ method: "POST" })
     const system = buildSystemPrompt(data.language);
     const raw =
       opt.provider === "gemini"
-        ? await callGemini(opt.model, system, userMessage)
-        : await callGroq(opt.model, system, userMessage);
+        ? await callGemini(opt.model, system, userMessage, data.apiKey)
+        : await callGroq(opt.model, system, userMessage, data.apiKey);
     const text = cleanOutput(raw);
     if (!text) throw new Error("ମଡେଲରୁ ଖାଲି ଉତ୍ତର ମିଳିଲା।");
     return { commentary: text };

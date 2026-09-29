@@ -33,3 +33,34 @@ export function saveModelId(id: string) {
     /* ignore */
   }
 }
+
+/* ---------- User-supplied API keys (stored only in this browser) ---------- */
+
+export const PROVIDER_INFO: Record<Provider, { name: string; keyUrl: string; placeholder: string }> = {
+  groq: { name: "Groq", keyUrl: "https://console.groq.com/keys", placeholder: "gsk_..." },
+  gemini: { name: "Google Gemini", keyUrl: "https://aistudio.google.com/apikey", placeholder: "AIza..." },
+};
+
+const KEYS_STORAGE = "sloka-api-keys-v1";
+
+export function loadApiKeys(): Partial<Record<Provider, string>> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(KEYS_STORAGE);
+    return raw ? (JSON.parse(raw) as Partial<Record<Provider, string>>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveApiKeys(keys: Partial<Record<Provider, string>>) {
+  try {
+    window.localStorage.setItem(KEYS_STORAGE, JSON.stringify(keys));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function providerOf(modelId: string): Provider {
+  return (MODELS.find((m) => m.id === modelId) ?? MODELS[0]!).provider;
+}

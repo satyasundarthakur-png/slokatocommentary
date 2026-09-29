@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { GitaPanel } from "@/components/GitaPanel";
 import { BulkPanel } from "@/components/BulkPanel";
 import { LANGUAGES, DEFAULT_LANGUAGE_ID, loadLanguageId, saveLanguageId } from "@/lib/languages";
-import { MODELS, DEFAULT_MODEL_ID, loadModelId, saveModelId } from "@/lib/models";
+import { MODELS, DEFAULT_MODEL_ID, loadModelId, saveModelId, loadApiKeys, saveApiKeys, providerOf, PROVIDER_INFO, type Provider } from "@/lib/models";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -45,6 +45,15 @@ function Index() {
   const [mode, setMode] = useState<"single" | "bulk" | "gita">("single");
   const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
   const [languageId, setLanguageId] = useState(DEFAULT_LANGUAGE_ID);
+  const [apiKeys, setApiKeys] = useState<Partial<Record<Provider, string>>>({});
+  const [showKey, setShowKey] = useState(false);
+  const provider = providerOf(modelId);
+  const apiKey = apiKeys[provider] ?? "";
+  function updateKey(v: string) {
+    const next = { ...apiKeys, [provider]: v.trim() };
+    setApiKeys(next);
+    saveApiKeys(next);
+  }
   const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
   const cancelRef = useRef(false);
   const unitsRef = useRef<TikaUnit[]>([]);
@@ -53,6 +62,7 @@ function Index() {
   useEffect(() => {
     setModelId(loadModelId());
     setLanguageId(loadLanguageId());
+    setApiKeys(loadApiKeys());
     const stored = loadBook();
     setUnits(stored);
     setActiveId(stored[stored.length - 1]?.id ?? null);
@@ -72,7 +82,7 @@ function Index() {
   async function handleSubmit(values: FormValues) {
     setBusy(true);
     try {
-      const { commentary } = await generate({ data: { ...values, modelId, language: languageId } });
+      const { commentary } = await generate({ data: { ...values, modelId, language: languageId, apiKey } });
       const unit: TikaUnit = {
         id: crypto.randomUUID(),
         ...values,
@@ -101,6 +111,7 @@ function Index() {
           topic: active.topic,
           length: active.length,
           modelId,
+          apiKey,
           language: active.language ?? "or",
         },
       });
@@ -121,7 +132,7 @@ function Index() {
     let err = "";
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        const { commentary } = await generate({ data: { ...v, modelId, language: languageId } });
+        const { commentary } = await generate({ data: { ...v, modelId, language: languageId, apiKey } });
         return { text: commentary, err: "" };
       } catch (e) {
         err = e instanceof Error ? e.message : "ତ୍ରୁଟି ହେଲା।";
@@ -262,6 +273,36 @@ function Index() {
                 <option key={m.id} value={m.id}>{m.label}</option>
               ))}
             </select>
+            <label htmlFor="apikey" className="mb-1.5 mt-3 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800">
+              {PROVIDER_INFO[provider].name} API Key
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="apikey"
+                type={showKey ? "text" : "password"}
+                autoComplete="off"
+                spellCheck={false}
+                value={apiKey}
+                disabled={busy}
+                placeholder={PROVIDER_INFO[provider].placeholder}
+                onChange={(e) => updateKey(e.target.value)}
+                className="glow-field min-w-0 flex-1 rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 font-mono text-[0.85rem] outline-none"
+              />
+              <button type="button" onClick={() => setShowKey((s) => !s)} className="rounded-xl border border-fuchsia-200 bg-white/80 px-3 font-interface text-xs text-fuchsia-900">
+                {showKey ? "Hide" : "Show"}
+              </button>
+              {apiKey && (
+                <button type="button" onClick={() => updateKey("")} className="rounded-xl border border-fuchsia-200 bg-white/80 px-3 font-interface text-xs text-fuchsia-900">
+                  Clear
+                </button>
+              )}
+            </div>
+            <p className="mt-1.5 font-interface text-[0.72rem] text-fuchsia-900/70">
+              {apiKey ? "✓ ଆପଣଙ୍କ କି ବ୍ୟବହୃତ ହେବ · Your key is saved only in this browser." : "Key saved only in this browser. "}
+              {!apiKey && (
+                <a href={PROVIDER_INFO[provider].keyUrl} target="_blank" rel="noreferrer" className="underline">Get a free key →</a>
+              )}
+            </p>
           </div>
           <div>
             <label htmlFor="language" className="mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800">ଟୀକାର ଭାଷା · Commentary language</label>
