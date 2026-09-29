@@ -5,6 +5,7 @@ export interface ParsedSloka {
 }
 
 const DEVA = /[\u0900-\u097F]/g;
+const HEADING = /अध्याय|प्रकरण|काण्ड|स्कन्ध|खण्ड|पर्व|श्रीमद्|उपनिषद्|—|योगः\s*$/;
 /** A line ends a verse when it closes with ॥, optionally as "॥ 12 ॥". */
 const VERSE_END = /॥\s*([०-९0-9][०-९0-9.\-–]*)?\s*॥?\s*$/;
 
@@ -37,8 +38,8 @@ export function splitSlokas(raw: string): ParsedSloka[] {
       continue;
     }
     if (!/[\u0900-\u097F]/.test(t)) continue; // skip English/other headings
-    // a short heading like "अध्याय १" starts no verse
-    if (buf.length === 0 && (t.match(DEVA)?.length ?? 0) < 12 && !/[।॥]/.test(t)) continue;
+    // headings ("अध्याय २", "श्रीमद्भगवद्गीता — …", "…योगः") start no verse
+    if (buf.length === 0 && !/[।॥]/.test(t) && ((t.match(DEVA)?.length ?? 0) < 12 || HEADING.test(t))) continue;
     buf.push(t);
     const m = t.match(VERSE_END);
     if (m) {
