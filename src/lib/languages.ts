@@ -1,4 +1,6 @@
-export interface Language {
+import { readChoice, writePref } from "./storage";
+
+interface Language {
   id: string;
   english: string;
   native: string;
@@ -31,16 +33,5 @@ export const getLanguage = (id?: string): Language =>
 
 const KEY = "sloka-language-v1";
 
-export function loadLanguageId(): string {
-  if (typeof window === "undefined") return DEFAULT_LANGUAGE_ID;
-  const v = window.localStorage.getItem(KEY);
-  return v && LANGUAGE_IDS.includes(v) ? v : DEFAULT_LANGUAGE_ID;
-}
-
-export function saveLanguageId(id: string) {
-  try {
-    window.localStorage.setItem(KEY, id);
-  } catch {
-    /* ignore */
-  }
-}
+export const loadLanguageId = () => readChoice(KEY, LANGUAGE_IDS, DEFAULT_LANGUAGE_ID);
+export const saveLanguageId = (id: string) => writePref(KEY, id);

@@ -17,7 +17,7 @@ const TikaInput = z.object({
   apiKey: z.string().trim().max(300).optional().default(""),
 });
 
-export type TikaInput = z.infer<typeof TikaInput>;
+type TikaInput = z.infer<typeof TikaInput>;
 
 const LENGTH_LABEL: Record<z.infer<typeof LengthEnum>, string> = {
   short: "ସଂକ୍ଷିପ୍ତ (~250-350 ଶବ୍ଦ)",

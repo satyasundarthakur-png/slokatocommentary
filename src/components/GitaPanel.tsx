@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { BookOpen, Square } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BatchProgress, SizeChips, type BatchProgressState } from "@/components/BatchControls";
+import { fieldCls, labelCls } from "@/components/formStyles";
 import { GITA_VERSES, fetchGitaVerse } from "@/lib/gita";
 import type { TikaLength } from "@/lib/book";
 import type { FormValues } from "@/components/VerseForm";
 
-const fieldCls =
-  "w-full glow-field rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 text-[0.95rem] text-foreground shadow-sm outline-none";
-const labelCls = "mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800";
 
 export function GitaPanel({
   busy,
@@ -16,7 +15,7 @@ export function GitaPanel({
   onCancel,
 }: {
   busy: boolean;
-  progress: { done: number; total: number; failed: number } | null;
+  progress: BatchProgressState | null;
   onStart: (items: FormValues[]) => Promise<void>;
   onCancel: () => void;
 }) {
@@ -56,8 +55,6 @@ export function GitaPanel({
     } else setFrom(end + 1);
   }
 
-  const pct = progress && progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
-
   return (
     <div className="space-y-4 font-odia">
       <p className="rounded-xl bg-gradient-to-r from-amber-100 to-fuchsia-100 px-3 py-2 text-sm text-fuchsia-900">
@@ -75,17 +72,7 @@ export function GitaPanel({
           <input id="g-from" type="number" min={1} max={max} value={from} onChange={(e) => setFrom(Number(e.target.value) || 1)} className={fieldCls} />
         </div>
       </div>
-      <div>
-        <span className={labelCls}>ଏକ ଥରରେ କେତେ ଶ୍ଲୋକ</span>
-        <div className="grid grid-cols-4 gap-2">
-          {[25, 50, 100, 0].map((n) => (
-            <button key={n} type="button" onClick={() => setSize(n)}
-              className={`glow-row rounded-xl border px-2 py-2 font-interface text-sm font-bold ${size === n ? "border-fuchsia-500 bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white shadow-[0_0_18px_#d946ef88]" : "border-fuchsia-200 bg-white/70 text-fuchsia-900"}`}>
-              {n === 0 ? "ଅଧ୍ୟାୟ ଶେଷ" : n}
-            </button>
-          ))}
-        </div>
-      </div>
+      <SizeChips value={size} onChange={setSize} allLabel="ଅଧ୍ୟାୟ ଶେଷ" />
       <select value={length} onChange={(e) => setLength(e.target.value as TikaLength)} className={fieldCls} aria-label="ଦୀର୍ଘତା">
         <option value="short">ସଂକ୍ଷିପ୍ତ</option><option value="medium">ମଧ୍ୟମ</option><option value="long">ଦୀର୍ଘ</option>
       </select>
@@ -95,11 +82,7 @@ export function GitaPanel({
       </label>
       {error && <p className="rounded-xl border-l-4 border-destructive bg-white/80 px-3 py-2 text-sm text-destructive">{error}</p>}
       {busy && progress ? (
-        <div className="space-y-2">
-          <div className="h-3 overflow-hidden rounded-full bg-white/70"><div className="glow-btn h-full rounded-full transition-all" style={{ width: `${pct}%` }} /></div>
-          <p className="text-center text-sm text-fuchsia-900">{progress.done} / {progress.total}{progress.failed ? ` · ${progress.failed} ବିଫଳ` : ""}</p>
-          <Button type="button" onClick={onCancel} variant="outline" className="w-full rounded-xl border-fuchsia-300 text-fuchsia-800"><Square aria-hidden="true" /> ବନ୍ଦ କରନ୍ତୁ</Button>
-        </div>
+        <BatchProgress progress={progress} onCancel={onCancel} />
       ) : (
         <Button type="button" onClick={run} disabled={busy || fetching} className="glow-btn h-12 w-full rounded-xl font-interface text-[0.95rem] font-semibold text-white">
           <BookOpen aria-hidden="true" />

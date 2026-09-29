@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { TikaLength } from "@/lib/book";
 import { Button } from "@/components/ui/button";
+import { fieldCls, labelCls } from "@/components/formStyles";
 import { Sparkles } from "lucide-react";
 
 export interface FormValues {
@@ -20,15 +21,12 @@ const EMPTY: FormValues = {
 };
 
 /** A verse must contain actual Devanagari text, not just a number reference. */
-export function hasSanskritText(v: string) {
+function hasSanskritText(v: string) {
   const deva = v.match(/[\u0900-\u097F]/g);
   return (deva?.length ?? 0) >= 8;
 }
 
-const fieldCls =
-  "w-full glow-field rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 text-[0.95rem] text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-teal focus:ring-2 focus:ring-teal/20";
 
-const labelCls = "mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800";
 
 export function VerseForm({
   busy,

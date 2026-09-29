@@ -1,6 +1,8 @@
+import { readChoice, readPref, writePref } from "./storage";
+
 export type Provider = "groq" | "gemini";
 
-export interface ModelOption {
+interface ModelOption {
   id: string;
   provider: Provider;
   model: string;
@@ -20,19 +22,8 @@ export const MODEL_IDS = MODELS.map((m) => m.id) as [string, ...string[]];
 
 const KEY = "sloka-model-v1";
 
-export function loadModelId(): string {
-  if (typeof window === "undefined") return DEFAULT_MODEL_ID;
-  const v = window.localStorage.getItem(KEY);
-  return v && MODEL_IDS.includes(v) ? v : DEFAULT_MODEL_ID;
-}
-
-export function saveModelId(id: string) {
-  try {
-    window.localStorage.setItem(KEY, id);
-  } catch {
-    /* ignore */
-  }
-}
+export const loadModelId = () => readChoice(KEY, MODEL_IDS, DEFAULT_MODEL_ID);
+export const saveModelId = (id: string) => writePref(KEY, id);
 
 /* ---------- User-supplied API keys (stored only in this browser) ---------- */
 
@@ -44,9 +35,8 @@ export const PROVIDER_INFO: Record<Provider, { name: string; keyUrl: string; pla
 const KEYS_STORAGE = "sloka-api-keys-v1";
 
 export function loadApiKeys(): Partial<Record<Provider, string>> {
-  if (typeof window === "undefined") return {};
   try {
-    const raw = window.localStorage.getItem(KEYS_STORAGE);
+    const raw = readPref(KEYS_STORAGE);
     return raw ? (JSON.parse(raw) as Partial<Record<Provider, string>>) : {};
   } catch {
     return {};
@@ -54,11 +44,7 @@ export function loadApiKeys(): Partial<Record<Provider, string>> {
 }
 
 export function saveApiKeys(keys: Partial<Record<Provider, string>>) {
-  try {
-    window.localStorage.setItem(KEYS_STORAGE, JSON.stringify(keys));
-  } catch {
-    /* ignore */
-  }
+  writePref(KEYS_STORAGE, JSON.stringify(keys));
 }
 
 export function providerOf(modelId: string): Provider {

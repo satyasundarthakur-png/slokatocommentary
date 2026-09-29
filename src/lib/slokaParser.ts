@@ -1,4 +1,4 @@
-export interface ParsedSloka {
+interface ParsedSloka {
   verse: string;
   /** Verse number found in the closing "॥ १.२ ॥" marker, if any. */
   number: string;

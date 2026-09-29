@@ -1,14 +1,12 @@
 import { useMemo, useState } from "react";
-import { FileUp, Layers, Square } from "lucide-react";
+import { FileUp, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BatchProgress, SizeChips, type BatchProgressState } from "@/components/BatchControls";
+import { fieldCls, labelCls } from "@/components/formStyles";
 import { readDocxText, splitSlokas } from "@/lib/slokaParser";
 import type { TikaLength } from "@/lib/book";
 import type { FormValues } from "@/components/VerseForm";
 
-const fieldCls =
-  "w-full glow-field rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 text-[0.95rem] text-foreground shadow-sm outline-none placeholder:text-muted-foreground/70";
-const labelCls = "mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800";
-const SIZES = [25, 50, 100, 0] as const;
 
 export function BulkPanel({
   busy,
@@ -17,7 +15,7 @@ export function BulkPanel({
   onCancel,
 }: {
   busy: boolean;
-  progress: { done: number; total: number; failed: number } | null;
+  progress: BatchProgressState | null;
   onStart: (items: FormValues[]) => Promise<void>;
   onCancel: () => void;
 }) {
@@ -68,8 +66,6 @@ export function BulkPanel({
     setStart(to + 1);
   }
 
-  const pct = progress && progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
-
   return (
     <div className="space-y-4 font-odia">
       <label className="glow-field flex cursor-pointer flex-col items-center gap-1 rounded-2xl border-2 border-dashed border-fuchsia-300 bg-white/60 px-4 py-5 text-center">
@@ -100,25 +96,7 @@ export function BulkPanel({
         {slokas.length} ଶ୍ଲୋକ ମିଳିଲା
       </p>
 
-      <div>
-        <span className={labelCls}>ଏକ ଥରରେ କେତେ ଶ୍ଲୋକ</span>
-        <div className="grid grid-cols-4 gap-2">
-          {SIZES.map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setSize(n)}
-              className={`glow-row rounded-xl border px-2 py-2 font-interface text-sm font-bold ${
-                size === n
-                  ? "border-fuchsia-500 bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white shadow-[0_0_18px_#d946ef88]"
-                  : "border-fuchsia-200 bg-white/70 text-fuchsia-900"
-              }`}
-            >
-              {n === 0 ? "ସମସ୍ତ" : n}
-            </button>
-          ))}
-        </div>
-      </div>
+      <SizeChips value={size} onChange={setSize} allLabel="ସମସ୍ତ" />
 
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -143,17 +121,7 @@ export function BulkPanel({
       )}
 
       {busy && progress ? (
-        <div className="space-y-2">
-          <div className="h-3 overflow-hidden rounded-full bg-white/70">
-            <div className="glow-btn h-full rounded-full transition-all" style={{ width: `${pct}%` }} />
-          </div>
-          <p className="text-center text-sm text-fuchsia-900">
-            {progress.done} / {progress.total} ସମ୍ପୂର୍ଣ୍ଣ{progress.failed ? ` · ${progress.failed} ବିଫଳ` : ""}
-          </p>
-          <Button type="button" onClick={onCancel} variant="outline" className="w-full rounded-xl border-fuchsia-300 text-fuchsia-800">
-            <Square aria-hidden="true" /> ବନ୍ଦ କରନ୍ତୁ
-          </Button>
-        </div>
+        <BatchProgress progress={progress} onCancel={onCancel} />
       ) : (
         <Button type="button" onClick={run} disabled={busy || count === 0} className="glow-btn h-12 w-full rounded-xl font-interface text-[0.95rem] font-semibold text-white">
           <Layers aria-hidden="true" />

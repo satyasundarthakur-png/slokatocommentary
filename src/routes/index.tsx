@@ -11,7 +11,9 @@ import { loadBook, move, saveBook, type TikaUnit } from "@/lib/book";
 import { exportBookDocx } from "@/lib/docxExport";
 import { generateTika } from "@/lib/tika.functions";
 import { Button } from "@/components/ui/button";
+import { SelectField } from "@/components/SelectField";
 import { GitaPanel } from "@/components/GitaPanel";
+import type { BatchProgressState } from "@/components/BatchControls";
 import { BulkPanel } from "@/components/BulkPanel";
 import { LANGUAGES, DEFAULT_LANGUAGE_ID, loadLanguageId, saveLanguageId } from "@/lib/languages";
 import { MODELS, DEFAULT_MODEL_ID, loadModelId, saveModelId, loadApiKeys, saveApiKeys, providerOf, PROVIDER_INFO, type Provider } from "@/lib/models";
@@ -54,7 +56,7 @@ function Index() {
     setApiKeys(next);
     saveApiKeys(next);
   }
-  const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
+  const [progress, setProgress] = useState<BatchProgressState | null>(null);
   const cancelRef = useRef(false);
   const unitsRef = useRef<TikaUnit[]>([]);
   const generate = useServerFn(generateTika);
@@ -261,18 +263,14 @@ function Index() {
             <h2 className="font-display text-2xl text-fuchsia-800">ନୂତନ ଟୀକା ଏକକ</h2>
           </div>
           <div>
-            <label htmlFor="model" className="mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800">AI ମଡେଲ୍</label>
-            <select
+            <SelectField
               id="model"
+              label="AI ମଡେଲ୍"
               value={modelId}
               disabled={busy}
-              onChange={(e) => { setModelId(e.target.value); saveModelId(e.target.value); }}
-              className="glow-field w-full rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 font-interface text-[0.9rem] outline-none"
-            >
-              {MODELS.map((m) => (
-                <option key={m.id} value={m.id}>{m.label}</option>
-              ))}
-            </select>
+              options={MODELS.map((m) => ({ value: m.id, label: m.label }))}
+              onChange={(v) => { setModelId(v); saveModelId(v); }}
+            />
             <label htmlFor="apikey" className="mb-1.5 mt-3 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800">
               {PROVIDER_INFO[provider].name} API Key
             </label>
@@ -304,20 +302,14 @@ function Index() {
               )}
             </p>
           </div>
-          <div>
-            <label htmlFor="language" className="mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800">ଟୀକାର ଭାଷା · Commentary language</label>
-            <select
-              id="language"
-              value={languageId}
-              disabled={busy}
-              onChange={(e) => { setLanguageId(e.target.value); saveLanguageId(e.target.value); }}
-              className="glow-field w-full rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 font-interface text-[0.9rem] outline-none"
-            >
-              {LANGUAGES.map((l) => (
-                <option key={l.id} value={l.id}>{l.native}{l.native !== l.english ? ` · ${l.english}` : ""}</option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            id="language"
+            label="ଟୀକାର ଭାଷା · Commentary language"
+            value={languageId}
+            disabled={busy}
+            options={LANGUAGES.map((l) => ({ value: l.id, label: l.native + (l.native !== l.english ? ` · ${l.english}` : "") }))}
+            onChange={(v) => { setLanguageId(v); saveLanguageId(v); }}
+          />
           <div className="grid grid-cols-3 gap-1 rounded-2xl bg-white/60 p-1 font-interface text-sm font-semibold">
             {([["single", "ଏକ ଶ୍ଲୋକ"], ["bulk", "ବହୁ · DOCX"], ["gita", "ଗୀତା"]] as const).map(([k, label]) => (
               <button
