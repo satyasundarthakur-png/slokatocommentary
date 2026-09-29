@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Download, Flower2 } from "lucide-react";
+import { Aurora } from "@/components/Aurora";
 import { BookSidebar } from "@/components/BookSidebar";
 import { CommentaryPanel } from "@/components/CommentaryPanel";
 import { VerseForm, type FormValues } from "@/components/VerseForm";
@@ -109,17 +110,18 @@ function Index() {
   }
 
   return (
-    <div className="min-h-screen border-t-4 border-marigold">
-      <header className="bg-primary text-primary-foreground shadow-lg">
+    <div className="min-h-screen">
+      <Aurora />
+      <header className="hero-bar sticky top-0 z-20 text-white">
         <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
           <div className="flex items-center gap-4">
-            <div className="hidden size-11 items-center justify-center border border-marigold/60 text-marigold sm:flex">
-              <Flower2 className="size-6" aria-hidden="true" />
+            <div className="hidden size-11 items-center justify-center rounded-full border border-white/50 bg-white/10 text-amber-200 shadow-[0_0_24px_#fbbf24aa] backdrop-blur sm:flex">
+              <Flower2 className="spin-slow size-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="font-interface text-[0.65rem] font-semibold uppercase text-marigold">Sloka Commentary · Manuscript Editor</p>
-              <h1 className="font-display text-2xl sm:text-3xl">
-                <span className="font-deva">श्लोक</span> <span className="text-marigold">—</span>{" "}
+              <p className="font-interface text-[0.65rem] font-semibold uppercase tracking-widest text-amber-200">Sloka Commentary · Manuscript Editor</p>
+              <h1 className="shimmer-text font-display text-3xl sm:text-4xl">
+                <span className="font-deva">श्लोक</span> <span>—</span>{" "}
               <span className="font-odia">ଓଡ଼ିଆ ଟୀକା</span>
               </h1>
             </div>
@@ -127,7 +129,7 @@ function Index() {
           <Button
             onClick={handleExport}
             variant="secondary"
-            className="border border-marigold/60 bg-marigold font-interface font-semibold text-ink shadow-none hover:bg-accent"
+            className="glow-btn border-0 font-interface font-semibold text-white"
           >
             <Download aria-hidden="true" />
             DOCX ରୂପେ ରପ୍ତାନି
@@ -135,14 +137,14 @@ function Index() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-[90rem] gap-0 border-x border-border bg-card shadow-xl lg:grid-cols-[23rem_1fr]">
-        <aside className="space-y-8 border-b border-sidebar-border bg-sidebar px-5 py-7 lg:min-h-[calc(100vh-93px)] lg:border-b-0 lg:border-r sm:px-6">
-          <div className="flex items-center gap-3 border-b-2 border-marigold pb-3">
-            <span className="size-2 bg-teal" />
-            <h2 className="font-display text-xl text-rubric">ନୂତନ ଟୀକା ଏକକ</h2>
+      <div className="mx-auto grid max-w-[90rem] gap-6 p-4 sm:p-6 lg:grid-cols-[23rem_1fr]">
+        <aside className="glow-card manuscript-settle space-y-8 rounded-3xl px-5 py-7 sm:px-6">
+          <div className="flex items-center gap-3 border-b-2 border-fuchsia-300 pb-3">
+            <span className="pulse-glow size-3 rounded-full bg-gradient-to-br from-amber-400 to-fuchsia-500" />
+            <h2 className="font-display text-2xl text-fuchsia-800">ନୂତନ ଟୀକା ଏକକ</h2>
           </div>
           <VerseForm busy={busy} onSubmit={handleSubmit} />
-          <div className="border-t-2 border-teal/40 pt-6">
+          <div className="border-t-2 border-dashed border-cyan-400/60 pt-6">
             <BookSidebar
               units={units}
               activeId={activeId}
@@ -157,8 +159,8 @@ function Index() {
           </div>
         </aside>
 
-        <main className="manuscript-settle relative min-h-[calc(100vh-93px)] overflow-hidden bg-card">
-          <div className="absolute inset-x-0 top-0 h-2 bg-teal" />
+        <main className="glow-card manuscript-settle relative min-h-[calc(100vh-9rem)] overflow-hidden rounded-3xl">
+          <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-amber-400 via-fuchsia-500 to-cyan-400" />
           <CommentaryPanel unit={active} busy={busy} onRegenerate={handleRegenerate} />
         </main>
       </div>

@@ -18,8 +18,8 @@ export function BookSidebar({
   return (
     <div className="space-y-1">
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-display text-lg text-rubric">ଗ୍ରନ୍ଥର ଏକକ</p>
-        <span className="bg-teal px-2 py-0.5 font-interface text-[0.65rem] font-bold text-secondary-foreground">{units.length}</span>
+        <p className="font-display text-xl text-fuchsia-800">ଗ୍ରନ୍ଥର ଏକକ</p>
+        <span className="rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-500 px-2.5 py-0.5 font-interface text-[0.65rem] font-bold text-white shadow-[0_0_12px_#d946ef]">{units.length}</span>
       </div>
       {units.length === 0 && (
         <p className="text-sm text-muted-foreground/80">ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ଏକକ ନାହିଁ।</p>
@@ -28,9 +28,9 @@ export function BookSidebar({
         {units.map((u, i) => (
           <li
             key={u.id}
-            className={`group flex items-center gap-1 border-l-4 px-2 py-2 transition-colors ${
+            className={`glow-row group flex items-center gap-1 rounded-xl border-l-4 px-2 py-2 ${
               u.id === activeId
-                ? "border-rubric bg-marigold/25"
+                ? "border-fuchsia-500 bg-gradient-to-r from-amber-200/60 to-fuchsia-200/50 shadow-[0_0_18px_#e879f966]"
                 : "border-transparent hover:bg-accent/50"
             }`}
           >

@@ -26,9 +26,9 @@ export function hasSanskritText(v: string) {
 }
 
 const fieldCls =
-  "w-full rounded-sm border border-sidebar-border bg-card/80 px-3 py-2.5 text-[0.95rem] text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-teal focus:ring-2 focus:ring-teal/20";
+  "w-full glow-field rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 text-[0.95rem] text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-teal focus:ring-2 focus:ring-teal/20";
 
-const labelCls = "mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-rubric";
+const labelCls = "mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800";
 
 export function VerseForm({
   busy,
@@ -142,7 +142,7 @@ export function VerseForm({
       <Button
         type="submit"
         disabled={busy}
-        className="h-11 w-full rounded-sm border-b-4 border-marigold bg-primary font-interface text-[0.9rem] font-semibold text-primary-foreground shadow-md hover:bg-teal"
+        className="glow-btn h-12 w-full rounded-xl font-interface text-[0.95rem] font-semibold text-white"
       >
         <Sparkles aria-hidden="true" />
         {busy ? "ଟୀକା ପ୍ରସ୍ତୁତ ହେଉଛି…" : "ଟୀକା ରଚନା କରନ୍ତୁ"}
