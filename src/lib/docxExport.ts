@@ -8,13 +8,16 @@ import {
 } from "docx";
 import type { TikaUnit } from "./book";
 import { parseCommentary } from "./book";
+import { getLanguage } from "./languages";
 
-const FONT = "Noto Sans Oriya";
+const VERSE_FONT = "Noto Serif Devanagari";
+const face = (name: string) => ({ ascii: name, hAnsi: name, cs: name, eastAsia: name });
 
 export async function exportBookDocx(units: TikaUnit[]) {
   const children: Paragraph[] = [];
 
   units.forEach((unit, index) => {
+    const FONT = face(getLanguage(unit.language).docxFont);
     if (index > 0) {
       children.push(new Paragraph({ children: [new PageBreak()] }));
     }
@@ -28,7 +31,7 @@ export async function exportBookDocx(units: TikaUnit[]) {
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 120, after: 60 },
-            children: [new TextRun({ text: line, font: FONT, size: 26, bold: true })],
+            children: [new TextRun({ text: line, font: face(VERSE_FONT), size: 26, bold: true })],
           }),
         ),
       );
@@ -64,7 +67,7 @@ export async function exportBookDocx(units: TikaUnit[]) {
   });
 
   const doc = new Document({
-    styles: { default: { document: { run: { font: FONT, size: 24 } } } },
+    styles: { default: { document: { run: { font: face("Noto Sans Oriya"), size: 24 } } } },
     sections: [
       {
         properties: {
@@ -75,7 +78,7 @@ export async function exportBookDocx(units: TikaUnit[]) {
         },
         children: children.length
           ? children
-          : [new Paragraph({ children: [new TextRun({ text: "—", font: FONT })] })],
+          : [new Paragraph({ children: [new TextRun({ text: "—" })] })],
       },
     ],
   });

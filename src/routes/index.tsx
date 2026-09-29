@@ -12,6 +12,7 @@ import { exportBookDocx } from "@/lib/docxExport";
 import { generateTika } from "@/lib/tika.functions";
 import { Button } from "@/components/ui/button";
 import { BulkPanel } from "@/components/BulkPanel";
+import { LANGUAGES, DEFAULT_LANGUAGE_ID, loadLanguageId, saveLanguageId } from "@/lib/languages";
 import { MODELS, DEFAULT_MODEL_ID, loadModelId, saveModelId } from "@/lib/models";
 
 export const Route = createFileRoute("/")({
@@ -42,6 +43,7 @@ function Index() {
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState<"single" | "bulk">("single");
   const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
+  const [languageId, setLanguageId] = useState(DEFAULT_LANGUAGE_ID);
   const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
   const cancelRef = useRef(false);
   const unitsRef = useRef<TikaUnit[]>([]);
@@ -49,6 +51,7 @@ function Index() {
 
   useEffect(() => {
     setModelId(loadModelId());
+    setLanguageId(loadLanguageId());
     const stored = loadBook();
     setUnits(stored);
     setActiveId(stored[stored.length - 1]?.id ?? null);
@@ -68,10 +71,11 @@ function Index() {
   async function handleSubmit(values: FormValues) {
     setBusy(true);
     try {
-      const { commentary } = await generate({ data: { ...values, modelId } });
+      const { commentary } = await generate({ data: { ...values, modelId, language: languageId } });
       const unit: TikaUnit = {
         id: crypto.randomUUID(),
         ...values,
+        language: languageId,
         commentary,
         createdAt: Date.now(),
       };
@@ -96,6 +100,7 @@ function Index() {
           topic: active.topic,
           length: active.length,
           modelId,
+          language: active.language ?? "or",
         },
       });
       persist(
@@ -115,7 +120,7 @@ function Index() {
     let err = "";
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        const { commentary } = await generate({ data: { ...v, modelId } });
+        const { commentary } = await generate({ data: { ...v, modelId, language: languageId } });
         return { text: commentary, err: "" };
       } catch (e) {
         err = e instanceof Error ? e.message : "ତ୍ରୁଟି ହେଲା।";
@@ -136,7 +141,7 @@ function Index() {
       const chunk = items.slice(i, i + 3);
       const results = await Promise.all(chunk.map(generateWithRetry));
       const fresh: TikaUnit[] = results.flatMap((r, k) =>
-        r.text ? [{ id: crypto.randomUUID(), ...chunk[k]!, commentary: r.text, createdAt: Date.now() }] : [],
+        r.text ? [{ id: crypto.randomUUID(), ...chunk[k]!, language: languageId, commentary: r.text, createdAt: Date.now() }] : [],
       );
       done += chunk.length;
       failed += chunk.length - fresh.length;
@@ -207,6 +212,20 @@ function Index() {
             >
               {MODELS.map((m) => (
                 <option key={m.id} value={m.id}>{m.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="language" className="mb-1.5 block font-interface text-[0.72rem] font-semibold uppercase text-fuchsia-800">ଟୀକାର ଭାଷା · Commentary language</label>
+            <select
+              id="language"
+              value={languageId}
+              disabled={busy}
+              onChange={(e) => { setLanguageId(e.target.value); saveLanguageId(e.target.value); }}
+              className="glow-field w-full rounded-xl border border-fuchsia-200 bg-white/80 px-3 py-2.5 font-interface text-[0.9rem] outline-none"
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.id} value={l.id}>{l.native}{l.native !== l.english ? ` · ${l.english}` : ""}</option>
               ))}
             </select>
           </div>

@@ -7,6 +7,8 @@ export interface TikaUnit {
   supportingTexts: string;
   topic: string;
   length: TikaLength;
+  /** Commentary language id (see languages.ts); missing on older units = Odia. */
+  language?: string;
   commentary: string;
   createdAt: number;
 }

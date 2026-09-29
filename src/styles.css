@@ -149,7 +149,7 @@
 
 /* ── Sloka Commentary: manuscript design system ─────────────────────── */
 @theme inline {
-  --font-odia: "Noto Sans Oriya", serif;
+  --font-odia: "Noto Sans Oriya", "Noto Sans Devanagari", "Noto Sans Bengali", "Noto Sans Telugu", "Noto Sans Tamil", "Noto Sans Kannada", "Noto Sans Malayalam", "Noto Sans Gujarati", "Noto Sans Gurmukhi", system-ui, serif;
   --font-deva: "Noto Serif Devanagari", serif;
   --font-display: "Instrument Serif", "Noto Sans Oriya", serif;
   --font-interface: "Work Sans", "Noto Sans Oriya", sans-serif;

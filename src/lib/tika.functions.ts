@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { TIKA_SYSTEM_PROMPT } from "./tikaSystemPrompt";
+import { DEFAULT_LANGUAGE_ID, LANGUAGE_IDS, getLanguage } from "./languages";
 import { DEFAULT_MODEL_ID, MODELS, MODEL_IDS } from "./models";
 
 const LengthEnum = z.enum(["short", "medium", "long"]);
@@ -12,6 +13,7 @@ const TikaInput = z.object({
   length: LengthEnum.optional().default("medium"),
   topic: z.string().trim().max(300).optional().default(""),
   modelId: z.enum(MODEL_IDS).optional().default(DEFAULT_MODEL_ID),
+  language: z.enum(LANGUAGE_IDS).optional().default(DEFAULT_LANGUAGE_ID),
 });
 
 export type TikaInput = z.infer<typeof TikaInput>;
@@ -30,6 +32,19 @@ function buildUserMessage(d: TikaInput) {
   return lines.join("\n\n");
 }
 
+/** The Odia style guide stays untouched; other languages get an output override appended. */
+function buildSystemPrompt(languageId: string) {
+  const lang = getLanguage(languageId);
+  if (lang.id === "or") return TIKA_SYSTEM_PROMPT;
+  const script =
+    lang.id === "en"
+      ? "Roman script"
+      : `${lang.english} in its native script (${lang.native})`;
+  return `${TIKA_SYSTEM_PROMPT}
+
+OUTPUT LANGUAGE OVERRIDE (highest priority): Write the ENTIRE commentary in ${lang.english}, using ${script}. Do not write in Odia. Keep exactly the same structure, unit segmentation, "●" separators, tone, depth and requested length described in the style guide above — treat its Odia wording only as a model of register, and reproduce that same traditional, reverent commentary register naturally in ${lang.english}. Quote Sanskrit terms and the verse itself in Devanagari as needed. Output only the commentary, with no notes about translation or language.`;
+}
+
 const cleanOutput = (t: string) => t.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 
 const fail = (status: number, provider: string, detail: string): never => {
@@ -39,7 +54,7 @@ const fail = (status: number, provider: string, detail: string): never => {
   throw new Error("ଟୀକା ପ୍ରସ୍ତୁତ କରିବାରେ ତ୍ରୁଟି ହେଲା।");
 };
 
-async function callGroq(model: string, userMessage: string) {
+async function callGroq(model: string, system: string, userMessage: string) {
   const apiKey = process.env["GROQ_API_KEY"];
   if (!apiKey) throw new Error("GROQ_API_KEY ସେଟ୍ ହୋଇନାହିଁ। ଦୟାକରି API କି ଯୋଡ଼ନ୍ତୁ।");
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -49,7 +64,7 @@ async function callGroq(model: string, userMessage: string) {
       model,
       temperature: 0.7,
       messages: [
-        { role: "system", content: TIKA_SYSTEM_PROMPT },
+        { role: "system", content: system },
         { role: "user", content: userMessage },
       ],
     }),
@@ -59,7 +74,7 @@ async function callGroq(model: string, userMessage: string) {
   return json.choices?.[0]?.message?.content ?? "";
 }
 
-async function callGemini(model: string, userMessage: string) {
+async function callGemini(model: string, system: string, userMessage: string) {
   const apiKey = process.env["GEMINI_API_KEY"];
   if (!apiKey) throw new Error("GEMINI_API_KEY ସେଟ୍ ହୋଇନାହିଁ। ଦୟାକରି API କି ଯୋଡ଼ନ୍ତୁ।");
   const res = await fetch(
@@ -68,7 +83,7 @@ async function callGemini(model: string, userMessage: string) {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: TIKA_SYSTEM_PROMPT }] },
+        systemInstruction: { parts: [{ text: system }] },
         contents: [{ role: "user", parts: [{ text: userMessage }] }],
         generationConfig: {
           temperature: 0.7,
@@ -90,10 +105,11 @@ export const generateTika = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const opt = MODELS.find((m) => m.id === data.modelId) ?? MODELS[0]!;
     const userMessage = buildUserMessage(data);
+    const system = buildSystemPrompt(data.language);
     const raw =
       opt.provider === "gemini"
-        ? await callGemini(opt.model, userMessage)
-        : await callGroq(opt.model, userMessage);
+        ? await callGemini(opt.model, system, userMessage)
+        : await callGroq(opt.model, system, userMessage);
     const text = cleanOutput(raw);
     if (!text) throw new Error("ମଡେଲରୁ ଖାଲି ଉତ୍ତର ମିଳିଲା।");
     return { commentary: text };
