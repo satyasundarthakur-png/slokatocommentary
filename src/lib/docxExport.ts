@@ -84,7 +84,7 @@ export async function exportBookDocx(units: TikaUnit[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "ashtavakra-tika.docx";
+  a.download = "sloka-commentary.docx";
   a.click();
   URL.revokeObjectURL(url);
 }

@@ -78,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AshtavakraTika — ଓଡ଼ିଆ ବେଦାନ୍ତ ଟୀକା" },
+      { title: "Sloka Commentary — ଓଡ଼ିଆ ବେଦାନ୍ତ ଟୀକା" },
       {
         name: "description",
         content: "Odia Vedantic commentary on Sanskrit verses, composed verse by verse.",
       },
-      { name: "author", content: "AshtavakraTika" },
-      { property: "og:title", content: "AshtavakraTika — ଓଡ଼ିଆ ବେଦାନ୍ତ ଟୀକା" },
+      { name: "author", content: "Sloka Commentary" },
+      { property: "og:title", content: "Sloka Commentary — ଓଡ଼ିଆ ବେଦାନ୍ତ ଟୀକା" },
       {
         property: "og:description",
         content: "Odia Vedantic commentary on Sanskrit verses, composed verse by verse.",

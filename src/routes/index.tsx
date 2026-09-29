@@ -14,13 +14,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AshtavakraTika — ଅଷ୍ଟାବକ୍ରଗୀତା ଓଡ଼ିଆ ଟୀକା" },
+      { title: "Sloka Commentary — ଶ୍ଲୋକ ଓଡ଼ିଆ ଟୀକା" },
       {
         name: "description",
         content:
           "Compose Odia Vedantic commentary on Sanskrit verses, verse by verse, and export the whole book as a print-ready DOCX.",
       },
-      { property: "og:title", content: "AshtavakraTika — ଅଷ୍ଟାବକ୍ରଗୀତା ଓଡ଼ିଆ ଟୀକା" },
+      { property: "og:title", content: "Sloka Commentary — ଶ୍ଲୋକ ଓଡ଼ିଆ ଟୀକା" },
       {
         property: "og:description",
         content:
@@ -117,9 +117,9 @@ function Index() {
               <Flower2 className="size-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="font-interface text-[0.65rem] font-semibold uppercase text-marigold">AshtavakraTika · Manuscript Editor</p>
+              <p className="font-interface text-[0.65rem] font-semibold uppercase text-marigold">Sloka Commentary · Manuscript Editor</p>
               <h1 className="font-display text-2xl sm:text-3xl">
-                <span className="font-deva">अष्टावक्रगीता</span> <span className="text-marigold">—</span>{" "}
+                <span className="font-deva">श्लोक</span> <span className="text-marigold">—</span>{" "}
               <span className="font-odia">ଓଡ଼ିଆ ଟୀକା</span>
               </h1>
             </div>

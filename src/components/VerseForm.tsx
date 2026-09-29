@@ -85,7 +85,7 @@ export function VerseForm({
           id="reference"
           value={values.reference}
           onChange={(e) => set("reference", e.target.value)}
-          placeholder="୨.୮ — ଅଷ୍ଟାବକ୍ରଗୀତା"
+          placeholder="୨.୮ — ଗ୍ରନ୍ଥ ନାମ"
           className={fieldCls}
         />
       </div>

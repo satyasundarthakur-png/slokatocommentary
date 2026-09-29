@@ -1,6 +1,6 @@
 # slokatocomentary
 
-Build "AshtavakraTika" — an Odia Vedantic commentary generator web app.
+Build "Sloka Commentary" — an Odia Vedantic commentary generator web app.
 
 STACK: React + Vite + TypeScript + Tailwind CSS. Use Groq API (openai/gpt-oss-120b model) 
 
@@ -76,7 +76,7 @@ CORE FLOW:
 
 7. UI: clean, minimal, warm off-white/parchment background evoking a printed book page — 
 
-   not a typical AI-tool UI. Header: "अष्टावक्रगीता — ଓଡ଼ିଆ ଟୀକା" or similar. No chat bubbles, 
+   not a typical AI-tool UI. Header: "श्लोक — ଓଡ଼ିଆ ଟୀକା" or similar. No chat bubbles, 
 
    no assistant-style framing — it should feel like a manuscript editor, not a chatbot.
 
