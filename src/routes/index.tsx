@@ -2,12 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Download, Flower2 } from "lucide-react";
 import { BookSidebar } from "@/components/BookSidebar";
 import { CommentaryPanel } from "@/components/CommentaryPanel";
 import { VerseForm, type FormValues } from "@/components/VerseForm";
 import { loadBook, move, saveBook, type TikaUnit } from "@/lib/book";
 import { exportBookDocx } from "@/lib/docxExport";
 import { generateTika } from "@/lib/tika.functions";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -107,31 +109,40 @@ function Index() {
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-border bg-card/70 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-5">
-          <div>
-            <h1 className="font-deva text-2xl tracking-tight text-ink">
-              अष्टावक्रगीता <span className="text-rubric">—</span>{" "}
+    <div className="min-h-screen border-t-4 border-marigold">
+      <header className="bg-primary text-primary-foreground shadow-lg">
+        <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
+          <div className="flex items-center gap-4">
+            <div className="hidden size-11 items-center justify-center border border-marigold/60 text-marigold sm:flex">
+              <Flower2 className="size-6" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-interface text-[0.65rem] font-semibold uppercase text-marigold">AshtavakraTika · Manuscript Editor</p>
+              <h1 className="font-display text-2xl sm:text-3xl">
+                <span className="font-deva">अष्टावक्रगीता</span> <span className="text-marigold">—</span>{" "}
               <span className="font-odia">ଓଡ଼ିଆ ଟୀକା</span>
-            </h1>
-            <p className="mt-1 text-[0.8rem] tracking-wide text-muted-foreground">
-              ପାରମ୍ପରିକ ବେଦାନ୍ତ ଟୀକା ସଙ୍କଳନ
-            </p>
+              </h1>
+            </div>
           </div>
-          <button
+          <Button
             onClick={handleExport}
-            className="rounded-sm border border-border bg-background px-4 py-2 text-sm tracking-wide text-foreground transition-colors hover:bg-accent"
+            variant="secondary"
+            className="border border-marigold/60 bg-marigold font-interface font-semibold text-ink shadow-none hover:bg-accent"
           >
+            <Download aria-hidden="true" />
             DOCX ରୂପେ ରପ୍ତାନି
-          </button>
+          </Button>
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-0 lg:grid-cols-[22rem_1fr]">
-        <aside className="space-y-8 border-b border-border bg-sidebar/60 px-6 py-8 lg:min-h-[calc(100vh-89px)] lg:border-b-0 lg:border-r">
+      <div className="mx-auto grid max-w-[90rem] gap-0 border-x border-border bg-card shadow-xl lg:grid-cols-[23rem_1fr]">
+        <aside className="space-y-8 border-b border-sidebar-border bg-sidebar px-5 py-7 lg:min-h-[calc(100vh-93px)] lg:border-b-0 lg:border-r sm:px-6">
+          <div className="flex items-center gap-3 border-b-2 border-marigold pb-3">
+            <span className="size-2 bg-teal" />
+            <h2 className="font-display text-xl text-rubric">ନୂତନ ଟୀକା ଏକକ</h2>
+          </div>
           <VerseForm busy={busy} onSubmit={handleSubmit} />
-          <div className="border-t border-border pt-6">
+          <div className="border-t-2 border-teal/40 pt-6">
             <BookSidebar
               units={units}
               activeId={activeId}
@@ -146,7 +157,8 @@ function Index() {
           </div>
         </aside>
 
-        <main className="bg-card/40">
+        <main className="manuscript-settle relative min-h-[calc(100vh-93px)] overflow-hidden bg-card">
+          <div className="absolute inset-x-0 top-0 h-2 bg-teal" />
           <CommentaryPanel unit={active} busy={busy} onRegenerate={handleRegenerate} />
         </main>
       </div>
