@@ -11,6 +11,7 @@ import { loadBook, move, saveBook, type TikaUnit } from "@/lib/book";
 import { exportBookDocx } from "@/lib/docxExport";
 import { generateTika } from "@/lib/tika.functions";
 import { Button } from "@/components/ui/button";
+import { GitaPanel } from "@/components/GitaPanel";
 import { BulkPanel } from "@/components/BulkPanel";
 import { LANGUAGES, DEFAULT_LANGUAGE_ID, loadLanguageId, saveLanguageId } from "@/lib/languages";
 import { MODELS, DEFAULT_MODEL_ID, loadModelId, saveModelId } from "@/lib/models";
@@ -41,7 +42,7 @@ function Index() {
   const [units, setUnits] = useState<TikaUnit[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [mode, setMode] = useState<"single" | "bulk">("single");
+  const [mode, setMode] = useState<"single" | "bulk" | "gita">("single");
   const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
   const [languageId, setLanguageId] = useState(DEFAULT_LANGUAGE_ID);
   const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
@@ -159,6 +160,53 @@ function Index() {
     setBusy(false);
   }
 
+  function download(name: string, text: string, mime: string) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function handleMarkdown() {
+    const md = units.map((u) => `## ${u.reference}\n\n${u.verse.split("\n").map((l) => `> ${l}`).join("\n")}\n\n${u.commentary.replace(/^\s*●\s*$/gm, "\n---\n")}`).join("\n\n---\n\n");
+    download("sloka-commentary.md", md, "text/markdown");
+  }
+
+  function handleBackup() {
+    download(`sloka-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(units), "application/json");
+  }
+
+  async function handleRestore(file: File) {
+    try {
+      const data = JSON.parse(await file.text()) as TikaUnit[];
+      if (!Array.isArray(data) || data.some((u) => !u || typeof u.verse !== "string" || typeof u.commentary !== "string")) throw new Error();
+      const have = new Set(unitsRef.current.map((u) => u.id));
+      const merged = [...unitsRef.current, ...data.filter((u) => !have.has(u.id))];
+      persist(merged);
+      toast.success(`${merged.length - have.size} ଏକକ ପୁନଃସ୍ଥାପିତ`);
+    } catch {
+      toast.error("ବ୍ୟାକଅପ୍ ଫାଇଲ୍ ବୈଧ ନୁହେଁ।");
+    }
+  }
+
+  function step(dir: -1 | 1) {
+    const i = units.findIndex((u) => u.id === activeId);
+    const next = units[i + dir];
+    if (next) setActiveId(next.id);
+  }
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && /INPUT|TEXTAREA|SELECT/.test(t.tagName)) return;
+      if (e.key === "ArrowRight") step(1);
+      if (e.key === "ArrowLeft") step(-1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   async function handleExport() {
     if (units.length === 0) {
       toast.error("ରପ୍ତାନି ପାଇଁ କୌଣସି ଏକକ ନାହିଁ।");
@@ -229,8 +277,8 @@ function Index() {
               ))}
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-1 rounded-2xl bg-white/60 p-1 font-interface text-sm font-semibold">
-            {([["single", "ଏକ ଶ୍ଲୋକ"], ["bulk", "ବହୁ ଶ୍ଲୋକ · DOCX"]] as const).map(([k, label]) => (
+          <div className="grid grid-cols-3 gap-1 rounded-2xl bg-white/60 p-1 font-interface text-sm font-semibold">
+            {([["single", "ଏକ ଶ୍ଲୋକ"], ["bulk", "ବହୁ · DOCX"], ["gita", "ଗୀତା"]] as const).map(([k, label]) => (
               <button
                 key={k}
                 type="button"
@@ -244,6 +292,8 @@ function Index() {
           </div>
           {mode === "single" ? (
             <VerseForm busy={busy} onSubmit={handleSubmit} />
+          ) : mode === "gita" ? (
+            <GitaPanel busy={busy} progress={progress} onStart={handleBulk} onCancel={() => { cancelRef.current = true; }} />
           ) : (
             <BulkPanel busy={busy} progress={progress} onStart={handleBulk} onCancel={() => { cancelRef.current = true; }} />
           )}
@@ -258,13 +308,16 @@ function Index() {
                 persist(next);
                 if (activeId === id) setActiveId(next[next.length - 1]?.id ?? null);
               }}
+            onMarkdown={handleMarkdown}
+              onBackup={handleBackup}
+              onRestore={handleRestore}
             />
           </div>
         </aside>
 
         <main className="glow-card manuscript-settle relative min-h-[calc(100vh-9rem)] overflow-hidden rounded-3xl">
           <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-amber-400 via-fuchsia-500 to-cyan-400" />
-          <CommentaryPanel unit={active} busy={busy} onRegenerate={handleRegenerate} />
+          <CommentaryPanel unit={active} busy={busy} onRegenerate={handleRegenerate} onPrev={() => step(-1)} onNext={() => step(1)} />
         </main>
       </div>
     </div>

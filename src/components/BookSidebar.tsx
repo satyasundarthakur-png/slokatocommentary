@@ -1,5 +1,6 @@
 import type { TikaUnit } from "@/lib/book";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { ArrowDown, ArrowUp, Download, FileText, Search, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function BookSidebar({
@@ -8,13 +9,21 @@ export function BookSidebar({
   onSelect,
   onMove,
   onDelete,
+  onMarkdown,
+  onBackup,
+  onRestore,
 }: {
   units: TikaUnit[];
   activeId: string | null;
   onSelect: (id: string) => void;
   onMove: (index: number, dir: -1 | 1) => void;
   onDelete: (id: string) => void;
+  onMarkdown: () => void;
+  onBackup: () => void;
+  onRestore: (file: File) => void;
 }) {
+  const [q, setQ] = useState("");
+  const needle = q.trim().toLowerCase();
   return (
     <div className="space-y-1">
       <div className="mb-3 flex items-center justify-between">
@@ -24,8 +33,15 @@ export function BookSidebar({
       {units.length === 0 && (
         <p className="text-sm text-muted-foreground/80">ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ଏକକ ନାହିଁ।</p>
       )}
+      {units.length > 3 && (
+        <div className="relative mb-2">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-fuchsia-500" aria-hidden="true" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ଖୋଜନ୍ତୁ…" aria-label="ଖୋଜନ୍ତୁ"
+            className="glow-field w-full rounded-xl border border-fuchsia-200 bg-white/80 py-2 pl-9 pr-3 text-sm outline-none" />
+        </div>
+      )}
       <ol className="space-y-1">
-        {units.map((u, i) => (
+        {units.map((u, i) => needle && !`${u.reference} ${u.verse} ${u.commentary}`.toLowerCase().includes(needle) ? null : (
           <li
             key={u.id}
             className={`glow-row group flex items-center gap-1 rounded-xl border-l-4 px-2 py-2 ${
@@ -69,6 +85,14 @@ export function BookSidebar({
           </li>
         ))}
       </ol>
+      {(
+        <div className="mt-4 grid grid-cols-3 gap-1.5 font-interface text-[0.7rem] font-semibold">
+          <button type="button" onClick={onMarkdown} className="glow-row flex flex-col items-center gap-0.5 rounded-xl bg-white/70 px-1 py-2 text-fuchsia-900"><FileText className="size-4" />Markdown</button>
+          <button type="button" onClick={onBackup} className="glow-row flex flex-col items-center gap-0.5 rounded-xl bg-white/70 px-1 py-2 text-fuchsia-900"><Download className="size-4" />Backup</button>
+          <label className="glow-row flex cursor-pointer flex-col items-center gap-0.5 rounded-xl bg-white/70 px-1 py-2 text-fuchsia-900"><Upload className="size-4" />Restore
+            <input type="file" accept="application/json" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) onRestore(f); e.target.value = ""; }} /></label>
+        </div>
+      )}
     </div>
   );
 }

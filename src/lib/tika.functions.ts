@@ -9,7 +9,7 @@ const LengthEnum = z.enum(["short", "medium", "long"]);
 const TikaInput = z.object({
   verse: z.string().trim().min(1).max(4000),
   reference: z.string().trim().min(1).max(300),
-  supportingTexts: z.string().trim().max(500).optional().default(""),
+  supportingTexts: z.string().trim().max(4000).optional().default(""),
   length: LengthEnum.optional().default("medium"),
   topic: z.string().trim().max(300).optional().default(""),
   modelId: z.enum(MODEL_IDS).optional().default(DEFAULT_MODEL_ID),
